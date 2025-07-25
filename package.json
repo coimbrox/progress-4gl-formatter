@@ -1,0 +1,38 @@
+{
+  "name": "progress-4gl-formatter",
+  "displayName": "Progress 4GL Formatter",
+  "description": "Formatter for Progress 4GL (OpenEdge ABL).",
+  "version": "0.0.1",
+  "publisher": "Gabriel Coimbra",
+  "engines": {
+    "vscode": "^1.80.0"
+  },
+  "categories": [
+    "Formatters"
+  ],
+  "activationEvents": [
+    "onLanguage:progress"
+  ],
+  "main": "./out/extension.js",
+  "contributes": {
+    "languages": [{
+      "id": "progress",
+      "aliases": ["Progress", "OpenEdge ABL"],
+      "extensions": [".p", ".w", ".i", ".cls"]
+    }],
+    "formatters": [{
+      "language": "progress",
+      "displayName": "Progress 4GL Formatter",
+      "id": "progress-4gl-formatter"
+    }]
+  },
+  "scripts": {
+    "vscode:prepublish": "npm run compile",
+    "compile": "tsc -p ./",
+    "watch": "tsc -watch -p ./"
+  },
+  "devDependencies": {
+    "@types/vscode": "^1.80.0",
+    "typescript": "^5.0.0"
+  }
+}
