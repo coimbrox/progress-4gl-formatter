@@ -3,7 +3,7 @@
   "displayName": "Progress 4GL Formatter",
   "description": "Formatter for Progress 4GL (OpenEdge ABL).",
   "version": "0.0.1",
-  "publisher": "Gabriel Coimbra",
+  "publisher": "GabrielCoimbra",
   "engines": {
     "vscode": "^1.80.0"
   },
@@ -34,5 +34,9 @@
   "devDependencies": {
     "@types/vscode": "^1.80.0",
     "typescript": "^5.0.0"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/coimbrox/progress-4gl-formatter"
   }
 }
