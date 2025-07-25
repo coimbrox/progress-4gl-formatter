@@ -2,7 +2,8 @@
   "name": "progress-4gl-formatter",
   "displayName": "Progress 4GL Formatter",
   "description": "Formatter for Progress 4GL (OpenEdge ABL).",
-  "version": "0.0.1",
+  "version": "0.0.2",
+  "icon": "./logo.png",
   "publisher": "GabrielCoimbra",
   "engines": {
     "vscode": "^1.80.0"

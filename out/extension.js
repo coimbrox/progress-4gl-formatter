@@ -17,7 +17,7 @@ function formatDocument(text) {
     const lines = text.split('\n');
     let formattedLines = [];
     let indentLevel = 0;
-    const indentSize = 4;
+    const indentSize = 2; // Alterado de 4 para 2
     const blockStartKeywords = [
         'DO:', 'FOR', 'REPEAT', 'FUNCTION', 'PROCEDURE', 'IF', 'FORM', 'THEN DO:'
     ];
@@ -25,7 +25,8 @@ function formatDocument(text) {
     let inMultiLineStatement = false;
     let inAssignBlock = false;
     let assignAlignmentColumn = 0;
-    let inDefineBlock = false; // Novo estado para blocos DEFINE
+    let inDefineBlock = false;
+    let inFindBlock = false; // Novo estado para blocos FIND/CAN-FIND
     for (const line of lines) {
         let trimmed = line.trim();
         if (trimmed === '') {
@@ -34,6 +35,16 @@ function formatDocument(text) {
         }
         const upperTrimmed = trimmed.toUpperCase();
         let currentIndentLevel = indentLevel;
+        // Lógica para blocos FIND/CAN-FIND
+        if (inFindBlock) {
+            if (upperTrimmed.startsWith('WHERE') || upperTrimmed.startsWith('AND') || upperTrimmed.startsWith('OR')) {
+                currentIndentLevel++;
+            }
+            else {
+                // Qualquer outra coisa encerra o bloco FIND
+                inFindBlock = false;
+            }
+        }
         // Se estiver em um bloco define, indenta o VIEW-AS
         if (inDefineBlock) {
             if (upperTrimmed.startsWith('VIEW-AS')) {
@@ -49,13 +60,16 @@ function formatDocument(text) {
             indentLevel = Math.max(0, indentLevel - 1);
             currentIndentLevel = indentLevel;
             inMultiLineStatement = false;
+            inFindBlock = false; // Encerra o bloco FIND também
         }
         else if (inMultiLineStatement && (upperTrimmed.startsWith('AND ') || upperTrimmed.startsWith('OR '))) {
-            // Não indenta extra para OR/AND em um IF, mas mantém para FIND/WHERE
-            // Esta lógica pode precisar de mais refinamento
+            if (!inFindBlock) { // A indentação do AND/OR do FIND é tratada acima
+                // Não indenta extra para OR/AND em um IF
+            }
         }
         else if (upperTrimmed.startsWith('THEN DO:')) {
             inMultiLineStatement = false;
+            inFindBlock = false; // THEN DO: encerra o bloco FIND
         }
         // Lógica para o bloco ASSIGN
         if (inAssignBlock) {
@@ -77,7 +91,7 @@ function formatDocument(text) {
                 }
             }
         }
-        let formattedLine = formatLineContent(trimmed, inAssignBlock, ' '.repeat(currentIndentLevel * indentSize), assignAlignmentColumn);
+        let formattedLine = formatLineContent(trimmed, inAssignBlock, ' '.repeat(currentIndentLevel * indentSize), assignAlignmentColumn, inFindBlock);
         formattedLines.push(' '.repeat(currentIndentLevel * indentSize) + formattedLine);
         // Lógica para aumentar a indentação para a próxima linha
         if (trimmed.endsWith(':') || blockStartKeywords.some(kw => upperTrimmed.startsWith(kw))) {
@@ -94,29 +108,53 @@ function formatDocument(text) {
             inDefineBlock = false;
         }
         // Ativa o modo multi-linha para IF e FIND
-        if (upperTrimmed.startsWith('IF ') || upperTrimmed.startsWith('FIND ') || upperTrimmed.startsWith('FOR ')) {
+        if (upperTrimmed.startsWith('IF ') || upperTrimmed.startsWith('FIND ') || upperTrimmed.startsWith('FOR ') || upperTrimmed.includes('CAN-FIND')) {
             inMultiLineStatement = true;
+            if (upperTrimmed.includes('CAN-FIND') || upperTrimmed.startsWith('FIND')) {
+                inFindBlock = true;
+            }
         }
     }
     return formattedLines.join('\n');
 }
-function formatLineContent(trimmedLine, inAssignBlock, indentString, assignAlignmentColumn) {
-    const keywords = [
-        'ADD', 'AND', 'AS', 'ASSIGN', 'AVAILABLE', 'BY', 'CAN-DO', 'CASE', 'CATCH',
-        'CREATE', 'DEF', 'DEFINE', 'DELETE', 'DISPLAY', 'DO', 'EACH', 'ELSE', 'END',
-        'EXCLUSIVE-LOCK', 'EXPORT', 'FINALLY', 'FIND', 'FIRST', 'FOR', 'FORM', 'FRAME',
-        'FUNCTION', 'IF', 'INPUT', 'JOIN', 'LAST', 'LEAVE', 'LIKE', 'MESSAGE', 'METHOD',
-        'NEW', 'NEXT', 'NO-ERROR', 'NO-LOCK', 'NO-UNDO', 'NOT', 'OF', 'ON', 'OR', 'OUTPUT',
-        'PARAMETER', 'PRIVATE', 'PROCEDURE', 'PROTECTED', 'PUBLIC', 'QUERY', 'REPEAT',
-        'RETURN', 'RUN', 'SET', 'SKIP', 'STATIC', 'TABLE', 'TEMP-TABLE', 'THEN', 'TO',
-        'TRANSACTION', 'UNDO', 'UPDATE', 'USING', 'VALIDATE', 'VAR', 'VARIABLE', 'VIEW-AS',
-        'WHERE', 'WHILE', 'WITH'
-    ];
+function formatLineContent(trimmedLine, inAssignBlock, indentString, assignAlignmentColumn, inFindBlock) {
+    // Mapa para formas abreviadas e minúsculas
+    const keywordMap = {
+        'DEFINE': 'def', 'VARIABLE': 'var', 'PARAMETER': 'param', 'PROCEDURE': 'proc',
+        'FUNCTION': 'func', 'TEMP-TABLE': 'temp-table', 'VIEW-AS': 'view-as',
+        'NO-UNDO': 'no-undo', 'NO-LOCK': 'no-lock', 'NO-ERROR': 'no-error',
+        'EXCLUSIVE-LOCK': 'exclusive-lock', 'AVAILABLE': 'avail',
+        // Palavras-chave que ficam apenas minúsculas
+        'ADD': 'add', 'AND': 'and', 'AS': 'as', 'ASSIGN': 'assign', 'BY': 'by',
+        'CAN-DO': 'can-do', 'CASE': 'case', 'CATCH': 'catch', 'CREATE': 'create',
+        'DELETE': 'delete', 'DISPLAY': 'display', 'DO': 'do', 'EACH': 'each',
+        'ELSE': 'else', 'END': 'end', 'EXPORT': 'export', 'FINALLY': 'finally',
+        'FIND': 'find', 'FIRST': 'first', 'FOR': 'for', 'FORM': 'form', 'FRAME': 'frame',
+        'IF': 'if', 'INPUT': 'input', 'JOIN': 'join', 'LAST': 'last', 'LEAVE': 'leave',
+        'LIKE': 'like', 'MESSAGE': 'message', 'METHOD': 'method', 'NEW': 'new',
+        'NEXT': 'next', 'NOT': 'not', 'OF': 'of', 'ON': 'on', 'OR': 'or', 'OUTPUT': 'output',
+        'PRIVATE': 'private', 'PROTECTED': 'protected', 'PUBLIC': 'public', 'QUERY': 'query',
+        'REPEAT': 'repeat', 'RETURN': 'return', 'RUN': 'run', 'SET': 'set', 'SKIP': 'skip',
+        'STATIC': 'static', 'TABLE': 'table', 'THEN': 'then', 'TO': 'to',
+        'TRANSACTION': 'transaction', 'UNDO': 'undo', 'UPDATE': 'update', 'USING': 'using',
+        'VALIDATE': 'validate', 'WHERE': 'where', 'WHILE': 'while', 'WITH': 'with'
+    };
+    const keywords = Object.keys(keywordMap);
     const regex = new RegExp(`\\b(${keywords.join('|')})\\b`, 'gi');
-    let formatted = trimmedLine.replace(regex, (keyword) => keyword.toLowerCase());
-    // Adiciona espaços ao redor de '=' em atribuições
+    let formatted = trimmedLine.replace(regex, (keyword) => keywordMap[keyword.toUpperCase()] || keyword.toLowerCase());
+    // Adiciona espaços ao redor de '='
     if (/assign/i.test(formatted) || (formatted.includes('=') && !/if|for|while|case/i.test(formatted))) {
         formatted = formatted.replace(/\s*=\s*/g, ' = ');
+    }
+    // Alinha blocos WHERE/AND em um FIND
+    if (inFindBlock && (formatted.startsWith('where') || formatted.startsWith('and') || formatted.startsWith('or'))) {
+        const parts = formatted.split('=');
+        if (parts.length === 2) {
+            const conditionPart = parts[0].trim();
+            const valuePart = parts[1].trim();
+            // Alinha a condição para ter 40 caracteres, depois o '=' e o valor
+            return `${conditionPart.padEnd(40)} = ${valuePart}`;
+        }
     }
     // Alinha blocos ASSIGN
     if (inAssignBlock && /^\w/.test(formatted) && formatted.includes('=')) {
