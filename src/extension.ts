@@ -19,24 +19,31 @@ export function activate(context: vscode.ExtensionContext) {
 }
 
 function formatDocument(text: string): string {
-  const lines = text.split('\n');
-  let formattedLines: string[] = [];
-  let indentLevel = 0;
-  const indentSize = 2; // Alterado de 4 para 2
+  const lines = text.split('\n');   //divide o texto em um array de linhas individuais 
+  let formattedLines: string[] = [];  // armazenar as linhas formatadas
+  let indentLevel = 0;  // mantem o nível de indentação atual
+  const indentSize = 2; // define o número de espaços para cada nível de indentação
 
+
+
+  /******* lista de palavras que indicam o inicio e fim de blocos de código */
   const blockStartKeywords = [
     'DO:', 'FOR', 'REPEAT', 'FUNCTION', 'PROCEDURE', 'IF', 'FORM', 'THEN DO:'
   ];
   const blockEndKeywords = ['END.', 'END', 'ELSE'];
+/******* fim da lista de palavras que indicam o inicio e fim de blocos de código */
 
+/** Variáveis de estado - controlam o estado atual do analisador, permitindo que a lógica de formatação se ajuste a diferentes contextos */
   let inMultiLineStatement = false;
   let inAssignBlock = false;
   let assignAlignmentColumn = 0;
   let inDefineBlock = false;
   let inFindBlock = false; // Novo estado para blocos FIND/CAN-FIND
+/* fim variáveis de estado */
 
+/*loop para iterar sobre cada linha do texto */
   for (const line of lines) {
-    let trimmed = line.trim();
+    let trimmed = line.trim();  // remove espaços em branco no início e no final da linha
     if (trimmed === '') {
       formattedLines.push('');
       continue;
@@ -64,12 +71,14 @@ function formatDocument(text: string): string {
         }
     }
 
-    // Lógica para diminuir a indentação
+    // Lógica para diminuir a indentação se começar com palavras-chave de fim de bloco ou Se a linha terminar com : ou começar com uma blockStartKeywords aumenta a indentação
     if (blockEndKeywords.some(kw => upperTrimmed.startsWith(kw))) {
       indentLevel = Math.max(0, indentLevel - 1);
       currentIndentLevel = indentLevel;
       inMultiLineStatement = false;
       inFindBlock = false; // Encerra o bloco FIND também
+
+
     } else if (inMultiLineStatement && (upperTrimmed.startsWith('AND ') || upperTrimmed.startsWith('OR '))) {
       if (!inFindBlock) { // A indentação do AND/OR do FIND é tratada acima
           // Não indenta extra para OR/AND em um IF
@@ -173,7 +182,7 @@ function formatLineContent(trimmedLine: string, inAssignBlock: boolean, indentSt
       }
   }
 
-  // Alinha blocos ASSIGN
+  // Alinha blocos ASSIGN e verificar se uma string começa com um caractere
   if (inAssignBlock && /^\w/.test(formatted) && formatted.includes('=')) {
       const parts = formatted.split('=');
       const variablePart = parts[0].trim();
