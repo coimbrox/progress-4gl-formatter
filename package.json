@@ -1,7 +1,7 @@
 {
   "name": "progress-4gl-formatter",
   "displayName": "Progress 4GL Formatter",
-  "description": "Formatter for Progress 4GL (OpenEdge ABL).",
+  "description": "Professional formatter for Progress 4GL (OpenEdge ABL) with intelligent code formatting, alignment, and clean code standards support.",
   "version": "0.0.4",
   "icon": "logo.png",
   "publisher": "GabrielCoimbra",

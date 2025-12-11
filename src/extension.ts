@@ -40,6 +40,10 @@ function formatDocument(text: string): string {
     // Estado para coletar linhas de blocos FIND/CAN-FIND
     let currentFindBlockLines: { originalLine: string, lineIndex: number, indent: string }[] = [];
     let processingFindBlock = false;
+    
+    // Estado para coletar linhas de blocos FOR EACH com WHERE
+    let currentForEachBlockLines: { originalLine: string, lineIndex: number, indent: string }[] = [];
+    let processingForEachBlock = false;
 
     // NOVO: Estado para coletar linhas de blocos condicionais (IF, FOR, REPEAT)
     let currentConditionalBlockLines: { originalLine: string, lineIndex: number, indent: string, parentKeywordIndent: number }[] = [];
@@ -53,6 +57,13 @@ function formatDocument(text: string): string {
 
         // Se a linha estiver vazia
         if (trimmed === '') {
+            // Processa blocos FOR EACH pendentes antes de adicionar linha vazia
+            if (processingForEachBlock && currentForEachBlockLines.length > 0) {
+                formattedLines.push(...processFindBlockLines(currentForEachBlockLines, indentSize));
+                currentForEachBlockLines = [];
+                indentLevel = Math.max(0, indentLevel - 1);
+                processingForEachBlock = false;
+            }
             // Processa blocos FIND/CAN-FIND pendentes antes de adicionar linha vazia
             if (processingFindBlock && currentFindBlockLines.length > 0) {
                 formattedLines.push(...processFindBlockLines(currentFindBlockLines, indentSize));
@@ -76,8 +87,60 @@ function formatDocument(text: string): string {
         const upperTrimmed = trimmed.toUpperCase();
         let currentIndentString = ' '.repeat(indentLevel * indentSize);
 
+        // Lógica para blocos FOR EACH com WHERE (prioridade alta)
+        const isForEachStart = upperTrimmed.startsWith('FOR EACH ') || upperTrimmed.startsWith('FOR FIRST ') || 
+                               upperTrimmed.startsWith('FOR LAST ') || upperTrimmed.startsWith('FOR FIRST-OF ') ||
+                               upperTrimmed.startsWith('FOR LAST-OF ');
+        const hasWhereInForEach = isForEachStart && (upperTrimmed.includes(' WHERE ') || upperTrimmed.includes(' where '));
+        
+        if (isForEachStart && !processingForEachBlock && !processingFindBlock) {
+            processingForEachBlock = true;
+            // Se estava processando um bloco condicional, finaliza-o
+            if (processingConditionalBlock && currentConditionalBlockLines.length > 0) {
+                formattedLines.push(...processConditionalBlockLines(currentConditionalBlockLines, indentSize, conditionalBlockInitialIndent));
+                currentConditionalBlockLines = [];
+                processingConditionalBlock = false;
+            }
+            
+            // Se tem WHERE na mesma linha, separa
+            if (hasWhereInForEach) {
+                const whereIndex = upperTrimmed.indexOf(' WHERE ');
+                const forEachPart = trimmed.substring(0, whereIndex).trim();
+                const wherePart = trimmed.substring(whereIndex + 1).trim(); // +1 para incluir o espaço após WHERE
+                
+                let formattedForEachLine = formatLineContent(forEachPart, false, currentIndentString, 0);
+                formattedLines.push(currentIndentString + formattedForEachLine);
+                
+                // Adiciona a primeira linha WHERE
+                currentForEachBlockLines.push({ originalLine: wherePart, lineIndex: i, indent: ' '.repeat((indentLevel + 1) * indentSize) });
+                indentLevel++; // Indenta para as cláusulas WHERE/AND/OR
+            } else {
+                // Sem WHERE na mesma linha, adiciona normalmente
+                let formattedForEachLine = formatLineContent(trimmed, false, currentIndentString, 0);
+                formattedLines.push(currentIndentString + formattedForEachLine);
+            }
+            continue;
+        }
+        // Coleta linhas WHERE/AND/OR dentro de um FOR EACH
+        if (processingForEachBlock && (upperTrimmed.startsWith('WHERE') || upperTrimmed.startsWith('AND') || upperTrimmed.startsWith('OR'))) {
+            currentForEachBlockLines.push({ originalLine: trimmed, lineIndex: i, indent: ' '.repeat((indentLevel + 1) * indentSize) });
+            continue;
+        }
+        // Finaliza o bloco FOR EACH se a linha não for uma condição esperada
+        else if (processingForEachBlock && !(upperTrimmed.startsWith('WHERE') || upperTrimmed.startsWith('AND') || upperTrimmed.startsWith('OR'))) {
+            if (currentForEachBlockLines.length > 0) {
+                formattedLines.push(...processFindBlockLines(currentForEachBlockLines, indentSize)); // Reutiliza a função de FIND
+                currentForEachBlockLines = [];
+            }
+            if (hasWhereInForEach) {
+                indentLevel = Math.max(0, indentLevel - 1); // Volta o nível de indentação
+            }
+            processingForEachBlock = false;
+            // Continua para o processamento normal da linha atual
+        }
+
         // Lógica para blocos FIND/CAN-FIND (prioridade alta para não conflitar com condições gerais)
-        if ((upperTrimmed.startsWith('FIND ') || upperTrimmed.includes('CAN-FIND')) && !processingFindBlock) {
+        if ((upperTrimmed.startsWith('FIND ') || upperTrimmed.includes('CAN-FIND')) && !processingFindBlock && !processingForEachBlock) {
             processingFindBlock = true;
             // Se estava processando um bloco condicional, finaliza-o
             if (processingConditionalBlock && currentConditionalBlockLines.length > 0) {
@@ -86,11 +149,27 @@ function formatDocument(text: string): string {
                 processingConditionalBlock = false;
             }
             
-            // Adiciona a linha FIND/CAN-FIND imediatamente
-            let formattedFindLine = formatLineContent(trimmed, false, currentIndentString, 0);
-            formattedLines.push(currentIndentString + formattedFindLine);
+            // Verifica se WHERE está na mesma linha ou na próxima
+            const hasWhereInFind = upperTrimmed.includes(' WHERE ') || upperTrimmed.includes(' where ');
             
-            indentLevel++; // Indenta para as cláusulas WHERE/AND/OR
+            if (hasWhereInFind) {
+                // WHERE na mesma linha - separa
+                const whereIndex = upperTrimmed.indexOf(' WHERE ');
+                const findPart = trimmed.substring(0, whereIndex).trim();
+                const wherePart = trimmed.substring(whereIndex + 1).trim();
+                
+                let formattedFindLine = formatLineContent(findPart, false, currentIndentString, 0);
+                formattedLines.push(currentIndentString + formattedFindLine);
+                
+                // Adiciona a primeira linha WHERE
+                currentFindBlockLines.push({ originalLine: wherePart, lineIndex: i, indent: ' '.repeat((indentLevel + 1) * indentSize) });
+                indentLevel++; // Indenta para as cláusulas WHERE/AND/OR
+            } else {
+                // WHERE na próxima linha - adiciona FIND normalmente
+                let formattedFindLine = formatLineContent(trimmed, false, currentIndentString, 0);
+                formattedLines.push(currentIndentString + formattedFindLine);
+                indentLevel++; // Indenta para as cláusulas WHERE/AND/OR
+            }
             continue;
         }
         // Coleta linhas WHERE/AND/OR dentro de um FIND
@@ -170,11 +249,13 @@ function formatDocument(text: string): string {
         if (blockEndKeywords.some(kw => upperTrimmed.startsWith(kw))) {
             indentLevel = Math.max(0, indentLevel - 1);
             currentIndentString = ' '.repeat(indentLevel * indentSize); // Aplica a nova indentação
-            // Se um END encerra um bloco condicional ou FIND, garante que os estados sejam resetados
+            // Se um END encerra um bloco condicional, FIND ou FOR EACH, garante que os estados sejam resetados
             processingConditionalBlock = false;
             processingFindBlock = false;
+            processingForEachBlock = false;
             currentConditionalBlockLines = [];
             currentFindBlockLines = [];
+            currentForEachBlockLines = [];
         }
         // Casos especiais que terminam blocos ou não requerem indentação extra
         else if (upperTrimmed.startsWith('THEN DO:')) {
@@ -191,23 +272,29 @@ function formatDocument(text: string): string {
             const assignKeywordMatch = trimmed.match(/^assign\s+/i);
             if (assignKeywordMatch) {
                 const afterAssign = trimmed.substring(assignKeywordMatch[0].length);
-                const firstFieldMatch = afterAssign.match(/^\S+/);
+                // Procura pelo primeiro campo e operador =
+                const firstFieldMatch = afterAssign.match(/^(\S+)\s*=\s*/);
                 if (firstFieldMatch) {
-                    assignAlignmentColumn = assignKeywordMatch[0].length + firstFieldMatch[0].length + 2;
+                    // Calcula a coluna onde o = deve ficar alinhado
+                    // Considera o tamanho de "assign " + nome do campo
+                    assignAlignmentColumn = assignKeywordMatch[0].length + firstFieldMatch[1].length;
                 }
             }
         } else if (inAssignBlock) {
-            if (!/^\w/.test(trimmed) || !trimmed.includes('=')) {
+            // Continua no bloco ASSIGN se a linha começa com um identificador e tem =
+            if (/^\w/.test(trimmed) && trimmed.includes('=')) {
+                // Continua no bloco ASSIGN
+            } else if (trimmed.endsWith('.')) {
                 inAssignBlock = false;
-            }
-            if (trimmed.endsWith('.')) {
+            } else {
+                // Linha que não parece ser continuação do ASSIGN
                 inAssignBlock = false;
             }
         }
 
         // Formata a linha atual (se não foi já tratada por um bloco especial)
         // Somente se a linha não faz parte de um bloco que já foi coletado e processado.
-        if (!isConditionalStart && !isConditionalContinuation && !processingFindBlock) {
+        if (!isConditionalStart && !isConditionalContinuation && !processingFindBlock && !processingForEachBlock) {
              let formattedLine = formatLineContent(trimmed, inAssignBlock, currentIndentString, assignAlignmentColumn);
              formattedLines.push(currentIndentString + formattedLine);
         }
@@ -223,14 +310,20 @@ function formatDocument(text: string): string {
         // Verifica o início de um bloco DEFINE que pode continuar na próxima linha
         if (upperTrimmed.startsWith('DEFINE VARIABLE') || upperTrimmed.startsWith('DEF VAR') ||
             upperTrimmed.startsWith('DEFINE TEMP-TABLE') || upperTrimmed.startsWith('DEF TEMP-TABLE') ||
-            upperTrimmed.startsWith('DEFINE PARAMETER') || upperTrimmed.startsWith('DEF PARAM')) {
+            upperTrimmed.startsWith('DEFINE PARAMETER') || upperTrimmed.startsWith('DEF PARAM') ||
+            upperTrimmed.startsWith('DEFINE BUFFER') || upperTrimmed.startsWith('DEF BUFFER') ||
+            upperTrimmed.startsWith('DEFINE STREAM') || upperTrimmed.startsWith('DEF STREAM') ||
+            upperTrimmed.startsWith('DEFINE NEW') || upperTrimmed.startsWith('DEF NEW')) {
             inDefineBlock = !trimmed.endsWith('.');
         } else if (inDefineBlock && trimmed.endsWith('.')) {
             inDefineBlock = false;
         }
     }
 
-    // Processa quaisquer blocos FIND/CAN-FIND ou condicionais restantes no final do arquivo
+    // Processa quaisquer blocos FOR EACH, FIND/CAN-FIND ou condicionais restantes no final do arquivo
+    if (processingForEachBlock && currentForEachBlockLines.length > 0) {
+        formattedLines.push(...processFindBlockLines(currentForEachBlockLines, indentSize));
+    }
     if (processingFindBlock && currentFindBlockLines.length > 0) {
         formattedLines.push(...processFindBlockLines(currentFindBlockLines, indentSize));
     }
@@ -429,23 +522,23 @@ function processConditionalBlockLines(lines: { originalLine: string, lineIndex: 
         if (item.logicalOperator) {
             const keyword = item.logicalOperator.toLowerCase();
             
-            // O padding ideal para o CONTEÚDO da condição será o mesmo tamanho do "IF " (if+espaco).
-            // Isso garante que o conteúdo ("condicao1", "condicao2") se alinhe.
-            const fixedContentPadding = '   '; // 3 espaços para alinhar com o "I" de "IF" (if + espaço)
+            // No exemplo, AND/OR ficam alinhados com o conteúdo após "if "
+            // Exemplo: "if   cd-modalidade-par = 01"
+            //          "or   cd-modalidade-par = 10"
+            // O padrão é: keyword + 3 espaços + conteúdo alinhado
+            const keywordPadding = '   '; // 3 espaços após a keyword para alinhar com o conteúdo do IF
 
             // A linha formatada para AND/OR
-            // O AND/OR se alinha com o 'I' de 'IF'
-            currentLineFormatted = `${initialIndentString}${keyword}${fixedContentPadding}${contentToAlign}`;
+            currentLineFormatted = `${initialIndentString}${keyword}${keywordPadding}${contentToAlign}`;
         } else {
             // Esta é a primeira linha do IF/FOR/REPEAT
             const keywordMatch = item.originalLine.match(/^(if|for|repeat)\s+/i);
             const keyword = keywordMatch ? keywordMatch[0].toLowerCase() : ''; // ex: "if "
             
-            // O conteúdo da primeira condição também usa o fixedContentPadding para alinhar
-            // com as linhas AND/OR subsequentes.
-            const fixedContentPadding = '   '; 
+            // O conteúdo da primeira condição também usa o mesmo padding
+            const keywordPadding = '   '; // 3 espaços após a keyword
             
-            currentLineFormatted = `${initialIndentString}${keyword}${fixedContentPadding}${contentToAlign}`;
+            currentLineFormatted = `${initialIndentString}${keyword}${keywordPadding}${contentToAlign}`;
         }
         
         formatted.push(currentLineFormatted.trim()); // Trim final para garantir que não haja espaços extras no fim
@@ -471,7 +564,7 @@ function formatLineContent(trimmedLine: string, inAssignBlock: boolean, indentSt
         'DEFINE': 'def',
         'VARIABLE': 'var',
         'PARAMETER': 'param',
-        'PROCEDURE': 'proce',
+        'PROCEDURE': 'procedure',
         'FUNCTION': 'function',
         'TEMP-TABLE': 'temp-table',
         'VIEW-AS': 'view-as',
@@ -484,6 +577,16 @@ function formatLineContent(trimmedLine: string, inAssignBlock: boolean, indentSt
         'DEFINE VARIABLE': 'def var',
         'DEFINE PARAMETER': 'def param',
         'DEFINE TEMP-TABLE': 'def temp-table',
+        'DEFINE BUFFER': 'def buffer',
+        'DEFINE STREAM': 'def stream',
+        'DEFINE NEW GLOBAL SHARED VAR': 'def new global shared var',
+        'DEFINE NEW SHARED VAR': 'def new shared var',
+        'DEFINE NEW GLOBAL SHARED VARIABLE': 'def new global shared var',
+        'DEFINE NEW SHARED VARIABLE': 'def new shared var',
+        'DEF INPUT PARAM': 'def input param',
+        'DEFINE INPUT PARAMETER': 'def input param',
+        'DEF OUTPUT PARAM': 'def output param',
+        'DEFINE OUTPUT PARAMETER': 'def output param',
 
         // Palavras-chave que ficam em minúsculas na sua forma completa ou não possuem abreviação comum
         'ADD': 'add', 'ACCUMULATE': 'accumulate', 'ADD-LAST': 'add-last', 'AND': 'and',
@@ -549,20 +652,45 @@ function formatLineContent(trimmedLine: string, inAssignBlock: boolean, indentSt
         if (parts.length > 1) {
             const variablePart = parts[0].trim();
             const valuePart = parts.slice(1).join('=').trim();
-            const currentLengthBeforeEquals = variablePart.length;
-            const padding = Math.max(0, assignAlignmentColumn - currentLengthBeforeEquals);
-            return `${variablePart}${' '.repeat(padding)} = ${valuePart}`;
+            
+            // Se é a primeira linha do ASSIGN, mantém o "assign " no início
+            if (formatted.toLowerCase().startsWith('assign ')) {
+                const assignMatch = formatted.match(/^(assign\s+)(.+)/i);
+                if (assignMatch) {
+                    const assignKeyword = assignMatch[1];
+                    const restOfLine = assignMatch[2];
+                    const restParts = restOfLine.split('=');
+                    if (restParts.length > 1) {
+                        const varPart = restParts[0].trim();
+                        const valPart = restParts.slice(1).join('=').trim();
+                        const padding = Math.max(0, assignAlignmentColumn - varPart.length);
+                        return `${assignKeyword}${varPart}${' '.repeat(padding)} = ${valPart}`;
+                    }
+                }
+            } else {
+                // Linhas subsequentes do ASSIGN - alinha o =
+                const padding = Math.max(0, assignAlignmentColumn - variablePart.length);
+                return `${variablePart}${' '.repeat(padding)} = ${valuePart}`;
+            }
         }
     }
 
-    if (/^def(ine)?\s+(var(iable)?|temp-table|param(eter)?)/i.test(formatted)) {
+    // Formatação de definições: def var, def param, def temp-table, def buffer, def stream, etc.
+    if (/^def(ine)?\s+(var(iable)?|temp-table|param(eter)?|buffer|stream|new)/i.test(formatted)) {
         const parts = formatted.split(/\s+/);
         let nameIndex = -1;
         if (parts[0].toLowerCase() === 'def' || parts[0].toLowerCase() === 'define') {
-            const typeKeyword = parts[1].toLowerCase();
-            if (typeKeyword === 'var' || typeKeyword === 'variable' ||
-                typeKeyword === 'temp-table' || typeKeyword === 'param' || typeKeyword === 'parameter') {
-                nameIndex = 2;
+            // Procura por palavras-chave que podem aparecer antes do nome (new, global, shared, input, output)
+            let typeKeywordIndex = 1;
+            while (typeKeywordIndex < parts.length) {
+                const keyword = parts[typeKeywordIndex].toLowerCase();
+                if (keyword === 'var' || keyword === 'variable' ||
+                    keyword === 'temp-table' || keyword === 'param' || keyword === 'parameter' ||
+                    keyword === 'buffer' || keyword === 'stream') {
+                    nameIndex = typeKeywordIndex + 1;
+                    break;
+                }
+                typeKeywordIndex++;
             }
         }
 
@@ -601,15 +729,20 @@ function formatLineContent(trimmedLine: string, inAssignBlock: boolean, indentSt
             parts[nameIndex] = hasQuotes ? `"${formattedName}"` : formattedName;
             formatted = parts.join(' ');
 
-            const match = formatted.match(/^(def(ine)?\s+(var(iable)?|temp-table|param(eter)?)\s+)([\w-]+|"[^"]+")(\s+(as|like|no-undo|initial|extent).*)*$/i);
-            if (match) {
-                const prefixPart = match[1];
-                const namePart = match[6];
-                const suffixPart = match[7] || '';
+            // Formatação de alinhamento: separa prefixo, nome e sufixo
+            const prefixEndIndex = nameIndex;
+            const prefixPart = parts.slice(0, prefixEndIndex).join(' ');
+            const namePart = parts[nameIndex];
+            const suffixPart = parts.slice(nameIndex + 1).join(' ');
 
-                const namePadding = 30;
-                const nameLength = namePart.replace(/^"|"$/g, '').length; 
-                return `${prefixPart}${namePart.padEnd(namePadding - (namePart.length - nameLength))}${suffixPart}`;
+            const namePadding = 30;
+            const nameLength = namePart.replace(/^"|"$/g, '').length;
+            const paddedName = namePart.padEnd(namePadding - (namePart.length - nameLength));
+            
+            if (suffixPart.trim()) {
+                return `${prefixPart} ${paddedName}${suffixPart}`;
+            } else {
+                return `${prefixPart} ${paddedName}`;
             }
         }
     }
