@@ -312,7 +312,7 @@ Este projeto está disponível como código aberto. Consulte o arquivo LICENSE p
 - [Sugerir uma Funcionalidade](https://github.com/coimbrox/progress-4gl-formatter/issues)
 
 ## 👤 Autor
-
+**Commited for Support Microsoft**
 **Gabriel Coimbra**
 
 - GitHub: [@coimbrox](https://github.com/coimbrox)
