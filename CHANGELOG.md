@@ -5,6 +5,14 @@ Todas as mudanças notáveis neste projeto serão documentadas neste arquivo.
 O formato é baseado em [Keep a Changelog](https://keepachangelog.com/pt-BR/1.0.0/),
 e este projeto adere ao [Semantic Versioning](https://semver.org/lang/pt-BR/).
 
+## [0.0.5] - 2026-08-25
+
+### ♻️ Reescrito
+
+- **Motor de formatação totalmente reescrito**: em vez de heurísticas por linha/regex, o formatador agora usa um lexer (tokenizer) real, que separa o código em tokens (strings, comentários, diretivas de preprocessador, palavras, operadores) antes de reformatar. Isso elimina bugs em que o formatador antigo alterava conteúdo dentro de strings/comentários e quebrava com variações de sintaxe não previstas.
+- **Estilo alvo baseado em código real**: as regras de alinhamento (`find`/`for each` com `where`/`and`, `assign`, `def var`/`def temp-table`, `if`/`and`/`or`) foram calibradas a partir de código de produção já escrito nesse padrão, usado como suíte de testes automatizados do formatador.
+- Removido o arquivo `testeExtensionCoimbrox.ts`, uma versão antiga/duplicada do formatador que não estava mais em uso.
+
 ## [0.0.4] - 2024-12-XX
 
 ### ✨ Adicionado

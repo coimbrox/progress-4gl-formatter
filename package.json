@@ -2,7 +2,7 @@
   "name": "progress-4gl-formatter",
   "displayName": "Progress 4GL Formatter",
   "description": "Professional formatter for Progress 4GL (OpenEdge ABL) with intelligent code formatting, alignment, and clean code standards support.",
-  "version": "0.0.4",
+  "version": "0.0.5",
   "icon": "logo.png",
   "publisher": "GabrielCoimbra",
   "engines": {
@@ -42,9 +42,11 @@
   "scripts": {
     "vscode:prepublish": "npm run compile",
     "compile": "tsc -p ./",
-    "watch": "tsc -watch -p ./"
+    "watch": "tsc -watch -p ./",
+    "test": "tsc -p ./ && node --test out/formatter/__tests__/*.test.js"
   },
   "devDependencies": {
+    "@types/node": "^22.0.0",
     "@types/vscode": "^1.80.0",
     "typescript": "^5.0.0"
   },
