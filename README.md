@@ -86,11 +86,11 @@ Adicione ao seu `settings.json` do VS Code:
 {
     "[progress]": {
         "editor.formatOnSave": true,
-        "editor.defaultFormatter": "GabrielCoimbra.progress-4gl-formatter"
+        "editor.defaultFormatter": "CoimbroxDev.progress-4gl-formatter"
     },
     "[abl]": {
         "editor.formatOnSave": true,
-        "editor.defaultFormatter": "GabrielCoimbra.progress-4gl-formatter"
+        "editor.defaultFormatter": "CoimbroxDev.progress-4gl-formatter"
     }
 }
 ```
@@ -260,7 +260,7 @@ assign vl-desconto-aux    = 0
 {
     "[progress]": {
         "editor.formatOnSave": true,
-        "editor.defaultFormatter": "GabrielCoimbra.progress-4gl-formatter",
+        "editor.defaultFormatter": "CoimbroxDev.progress-formatter",
         "editor.tabSize": 2,
         "editor.insertSpaces": true
     }
