@@ -1,0 +1,86 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "title": "OpenEdge ABL Configuration (.openedge-zext.json / .openedge-abl.json)",
+  "description": "Configuração do ambiente OpenEdge ABL (DLC, PROPATH, Parameter Files, Dicionário e Deploy).",
+  "type": "object",
+  "properties": {
+    "workingDirectory": {
+      "type": "string",
+      "description": "Diretório de trabalho usado na compilação/execução. Suporta ${workspaceFolder}. Padrão: pasta do arquivo ativo."
+    },
+    "proPath": {
+      "type": "array",
+      "description": "Lista de diretórios do PROPATH. Suporta ${workspaceFolder}. Padrão: raiz do workspace.",
+      "items": {
+        "type": "string"
+      }
+    },
+    "proPathMode": {
+      "type": "string",
+      "enum": ["overwrite", "append", "prepend"],
+      "default": "overwrite",
+      "description": "Como combinar o proPath configurado com o PROPATH do ambiente."
+    },
+    "dlcPath": {
+      "type": "string",
+      "description": "Caminho da instalação OpenEdge (DLC), ex: C:\\Progress\\OpenEdge ou C:\\dlc116. Opcional se a variável de ambiente DLC estiver definida."
+    },
+    "parameterFiles": {
+      "type": "array",
+      "description": "Arquivos .pf de parâmetros de conexão/sessão OpenEdge.",
+      "items": {
+        "type": "string"
+      }
+    },
+    "dbDictionary": {
+      "type": "array",
+      "description": "Nomes lógicos dos bancos de dados para geração do dicionário de auto-complete.",
+      "items": {
+        "type": "string"
+      }
+    },
+    "deployment": {
+      "type": "array",
+      "description": "Tarefas de deploy executadas nos comandos Compile & Deploy (Alt+F1), Deploy Source (Alt+F2) e Compile with Options (Alt+F3).",
+      "items": {
+        "type": "object",
+        "required": ["taskType", "path"],
+        "properties": {
+          "taskType": {
+            "type": "string",
+            "enum": ["current.r-code", "current.source"],
+            "description": "Tipo de arquivo a enviar no deploy: current.r-code (.r compilado) ou current.source (arquivo fonte)."
+          },
+          "path": {
+            "type": "string",
+            "description": "Diretório de destino do deploy. Suporta ${workspaceFolder}."
+          },
+          "preserveSubfolder": {
+            "type": "boolean",
+            "default": false,
+            "description": "Se true, mantém a estrutura de subpastas relativa ao workspace ao gerar o arquivo na pasta de destino."
+          },
+          "postAction": {
+            "type": "array",
+            "description": "Ações executadas após o deploy.",
+            "items": {
+              "type": "object",
+              "required": ["actionType", "command"],
+              "properties": {
+                "actionType": {
+                  "type": "string",
+                  "enum": ["URL", "COMMAND"],
+                  "description": "URL faz uma requisição HTTP GET; COMMAND executa um comando no shell."
+                },
+                "command": {
+                  "type": "string",
+                  "description": "URL ou comando a ser executado."
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+  }
+}

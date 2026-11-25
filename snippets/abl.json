@@ -1,0 +1,136 @@
+{
+  "Define Variable": {
+    "prefix": "defvar",
+    "body": [
+      "def var ${1:c-nome} as ${2|char,int,dec,log,date,datetime,handle,rowid,longchar|} no-undo."
+    ],
+    "description": "Define a local variable (def var ... no-undo.)"
+  },
+  "Define Parameter": {
+    "prefix": "defparam",
+    "body": [
+      "def ${1|input,output,input-output|} param ${2:p-nome} as ${3|char,int,dec,log,date,handle|} no-undo."
+    ],
+    "description": "Define a parameter"
+  },
+  "Define Temp-Table": {
+    "prefix": "deftt",
+    "body": [
+      "def temp-table ${1:tt-tabela} no-undo",
+      "    field ${2:campo1} as ${3|char,int,dec,log,date|}",
+      "    index ${4:idx-1} is primary ${2:campo1}."
+    ],
+    "description": "Define a temp-table"
+  },
+  "Define Buffer": {
+    "prefix": "defbuf",
+    "body": [
+      "def buffer ${1:b-tabela} for ${2:tabela}."
+    ],
+    "description": "Define a buffer for a table"
+  },
+  "For Each": {
+    "prefix": "for",
+    "body": [
+      "for each ${1:tabela} no-lock",
+      "   where ${1:tabela}.${2:campo} = ${3:valor}:",
+      "    $0",
+      "end."
+    ],
+    "description": "FOR EACH ... NO-LOCK block"
+  },
+  "Find First": {
+    "prefix": "find",
+    "body": [
+      "find first ${1:tabela} no-lock",
+      "     where ${1:tabela}.${2:campo} = ${3:valor} no-error.",
+      "if avail ${1:tabela} then do:",
+      "    $0",
+      "end."
+    ],
+    "description": "FIND FIRST ... NO-LOCK NO-ERROR with IF AVAIL"
+  },
+  "If Then Do": {
+    "prefix": "ifdo",
+    "body": [
+      "if ${1:condicao} then do:",
+      "    $0",
+      "end."
+    ],
+    "description": "IF ... THEN DO: ... END."
+  },
+  "Procedure": {
+    "prefix": "proc",
+    "body": [
+      "procedure ${1:pi-nome}:",
+      "    def input param ${2:p-param} as ${3:char} no-undo.",
+      "",
+      "    $0",
+      "end procedure."
+    ],
+    "description": "Internal PROCEDURE block"
+  },
+  "Function": {
+    "prefix": "func",
+    "body": [
+      "function ${1:fn-nome} returns ${2|char,int,dec,log,date|} (${3:input p-param as char}):",
+      "    $0",
+      "    return ${4:\"\"}.",
+      "end function."
+    ],
+    "description": "Internal FUNCTION block"
+  },
+  "Method": {
+    "prefix": "method",
+    "body": [
+      "method ${1|public,private,protected|} ${2|void,char,int,dec,log|} ${3:NomeMetodo}(${4:input pParam as char}):",
+      "    $0",
+      "end method."
+    ],
+    "description": "Class METHOD block"
+  },
+  "Class": {
+    "prefix": "class",
+    "body": [
+      "block-level on error undo, throw.",
+      "",
+      "class ${1:NomeClasse}:",
+      "",
+      "    constructor public ${1:NomeClasse}():",
+      "        $0",
+      "    end constructor.",
+      "",
+      "end class."
+    ],
+    "description": "OpenEdge OOABL Class template"
+  },
+  "Region Folding": {
+    "prefix": "region",
+    "body": [
+      "//#region ${1:Titulo}",
+      "$0",
+      "//#endregion"
+    ],
+    "description": "Code folding region (//#region ... //#endregion)"
+  },
+  "Do On Error Undo Throw": {
+    "prefix": "try",
+    "body": [
+      "do on error undo, throw:",
+      "    $0",
+      "    catch e as Progress.Lang.Error:",
+      "        message e:GetMessage(1) view-as alert-box error.",
+      "    end catch.",
+      "end."
+    ],
+    "description": "Structured error handling (DO ON ERROR UNDO, THROW / CATCH)"
+  },
+  "Message Alert Box": {
+    "prefix": "msg",
+    "body": [
+      "message \"${1:Mensagem}\"",
+      "    view-as alert-box ${2|info,warning,error,question|} buttons ok."
+    ],
+    "description": "MESSAGE ... VIEW-AS ALERT-BOX"
+  }
+}

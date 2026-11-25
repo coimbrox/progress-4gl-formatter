@@ -1,0 +1,149 @@
+{
+  "$schema": "https://raw.githubusercontent.com/martinring/tmlanguage/master/tmlanguage.json",
+  "name": "OpenEdge ABL (Progress 4GL)",
+  "scopeName": "source.abl",
+  "fileTypes": ["p", "w", "i", "cls"],
+  "patterns": [
+    { "include": "#comments" },
+    { "include": "#strings" },
+    { "include": "#preprocessors" },
+    { "include": "#includes" },
+    { "include": "#numbers" },
+    { "include": "#types" },
+    { "include": "#keywords" },
+    { "include": "#constants" },
+    { "include": "#operators" },
+    { "include": "#functions" }
+  ],
+  "repository": {
+    "comments": {
+      "patterns": [
+        {
+          "name": "comment.line.double-slash.abl",
+          "match": "//.*$"
+        },
+        {
+          "name": "comment.block.abl",
+          "begin": "/\\*",
+          "end": "\\*/",
+          "patterns": [
+            { "include": "#comments" }
+          ]
+        }
+      ]
+    },
+    "strings": {
+      "patterns": [
+        {
+          "name": "string.quoted.double.abl",
+          "begin": "\"",
+          "end": "\"",
+          "patterns": [
+            {
+              "name": "constant.character.escape.abl",
+              "match": "~.|\"\""
+            }
+          ]
+        },
+        {
+          "name": "string.quoted.single.abl",
+          "begin": "'",
+          "end": "'",
+          "patterns": [
+            {
+              "name": "constant.character.escape.abl",
+              "match": "~.|''"
+            }
+          ]
+        }
+      ]
+    },
+    "preprocessors": {
+      "patterns": [
+        {
+          "name": "meta.preprocessor.abl",
+          "match": "(?i)^\\s*(&(?:ANALYZE-SUSPEND|ANALYZE-RESUME|SCOPED-DEFINE|GLOBAL-DEFINE|UNDEFINE|IF|ELSEIF|ELSE|ENDIF|MESSAGE|THEN))\\b"
+        },
+        {
+          "name": "variable.other.preprocessor.abl",
+          "match": "\\{&[A-Za-z0-9_\\-]+\\}"
+        }
+      ]
+    },
+    "includes": {
+      "patterns": [
+        {
+          "name": "meta.include.abl",
+          "begin": "\\{",
+          "end": "\\}",
+          "beginCaptures": {
+            "0": { "name": "punctuation.definition.include.begin.abl" }
+          },
+          "endCaptures": {
+            "0": { "name": "punctuation.definition.include.end.abl" }
+          },
+          "patterns": [
+            { "include": "#strings" },
+            { "include": "#includes" },
+            {
+              "name": "entity.name.filename.include.abl",
+              "match": "[^\\s{}&\"']+"
+            }
+          ]
+        }
+      ]
+    },
+    "numbers": {
+      "patterns": [
+        {
+          "name": "constant.numeric.abl",
+          "match": "\\b\\d+(?:\\.\\d+)?\\b"
+        }
+      ]
+    },
+    "types": {
+      "patterns": [
+        {
+          "name": "storage.type.abl",
+          "match": "(?i)(?<![A-Za-z0-9_\\-])(CHARACTER|CHAR|INTEGER|INT|INT64|DECIMAL|DEC|LOGICAL|LOG|DATE|DATETIME|DATETIME-TZ|HANDLE|ROWID|RECID|RAW|MEMPTR|LONGCHAR|CLOB|BLOB|COM-HANDLE|WIDGET-HANDLE|VOID|CLASS|INTERFACE|ENUM|TEMP-TABLE|DATASET|BUFFER|QUERY|STREAM|FRAME|BUTTON|FILL-IN|EDITOR|TOGGLE-BOX|COMBO-BOX|SELECTION-LIST|RADIO-SET|BROWSE|WINDOW|DIALOG-BOX|MENU|SUB-MENU|IMAGE|RECTANGLE)(?![A-Za-z0-9_\\-])"
+        }
+      ]
+    },
+    "keywords": {
+      "patterns": [
+        {
+          "name": "keyword.control.abl",
+          "match": "(?i)(?<![A-Za-z0-9_\\-])(IF|THEN|ELSE|DO|END|FOR|EACH|FIRST|LAST|OF|WHERE|BY|DESCENDING|REPEAT|WHILE|LEAVE|NEXT|RETRY|UNDO|THROW|CATCH|FINALLY|CASE|WHEN|OTHERWISE|RETURN|RUN|ON|ERROR|STOP|QUIT|WAIT-FOR|PAUSE|TRIGGERS|PROCEDURE|FUNCTION|METHOD|CONSTRUCTOR|DESTRUCTOR|PROPERTY|GET|SET|RETURNS|FORWARD|SUPER|THIS-OBJECT|USING|INHERITS|IMPLEMENTS|BLOCK-LEVEL|ROUTINE-LEVEL|TRANSACTION)(?![A-Za-z0-9_\\-])"
+        },
+        {
+          "name": "keyword.other.abl",
+          "match": "(?i)(?<![A-Za-z0-9_\\-])(DEFINE|DEF|VARIABLE|VAR|PARAMETER|PARAM|INPUT|OUTPUT|INPUT-OUTPUT|NEW|GLOBAL|SHARED|PUBLIC|PRIVATE|PROTECTED|PACKAGE-PRIVATE|PACKAGE-PROTECTED|STATIC|ABSTRACT|OVERRIDE|FINAL|SERIALIZABLE|NO-UNDO|NO-LOCK|EXCLUSIVE-LOCK|SHARE-LOCK|NO-ERROR|NO-WAIT|NO-PREFETCH|NO-BOX|NO-LABELS|NO-PAUSE|AS|LIKE|INITIAL|INIT|EXTENT|FORMAT|LABEL|COLUMN-LABEL|FIELD|INDEX|PRIMARY|UNIQUE|WORD-INDEX|FIND|CAN-FIND|AVAILABLE|AVAIL|CREATE|DELETE|ASSIGN|DISPLAY|DISP|UPDATE|SET|MESSAGE|VIEW-AS|ALERT-BOX|INFO|WARNING|QUESTION|BUTTONS|OK|YES-NO|OPEN|CLOSE|IMPORT|EXPORT|PUT|UNFORMATTED|SKIP|FROM|TO|THROUGH|THRU|IN|INTO|WITH|DOWN|CENTERED|TITLE|SIZE|AT|ROW|COL|COLON|SIDE-LABELS|ENABLE|DISABLE|HIDE|VIEW|CLEAR|RELEASE|VALIDATE|BUFFER-COPY|BUFFER-COMPARE|EMPTY|COPY-LOB|COMPILE|SAVE|XREF|XREF-XML|DEBUG-LIST|PREPROCESS|LISTING|PERSISTENT|SINGLE-RUN|SINGLETON|TABLE|TABLE-HANDLE|DATASET-HANDLE|APPEND|BY-REFERENCE|BIND|SUBSTRING|ENTRY|NUM-ENTRIES|LOOKUP|INDEX|R-INDEX|TRIM|LEFT-TRIM|RIGHT-TRIM|LENGTH|REPLACE|SUBSTITUTE|CAPS|LC|STRING|INTEGER|DECIMAL|DATE|TODAY|TIME|NOW|ABSOLUTE|ROUND|TRUNCATE|MINIMUM|MAXIMUM|CAN-DO|MATCHES|BEGINS|CONTAINS|AND|OR|NOT|EQ|NE|LT|LE|GT|GE|IS|MODULO|SESSION|SELF|THIS-PROCEDURE|ERROR-STATUS|COMPILER|FILE-INFO|LOG-MANAGER|OS-COMMAND|OS-DELETE|OS-COPY|OS-RENAME|OS-CREATE-DIR|SEARCH)(?![A-Za-z0-9_\\-])"
+        }
+      ]
+    },
+    "constants": {
+      "patterns": [
+        {
+          "name": "constant.language.boolean.abl",
+          "match": "(?i)(?<![A-Za-z0-9_\\-])(TRUE|FALSE|YES|NO|\\?)(?![A-Za-z0-9_\\-])"
+        }
+      ]
+    },
+    "operators": {
+      "patterns": [
+        {
+          "name": "keyword.operator.abl",
+          "match": "(<>|<=|>=|::|=|<|>|\\+|-|\\*|/)"
+        }
+      ]
+    },
+    "functions": {
+      "patterns": [
+        {
+          "name": "entity.name.function.abl",
+          "match": "\\b([A-Za-z_][A-Za-z0-9_\\-]*)\\s*(?=\\()"
+        }
+      ]
+    }
+  }
+}

@@ -1,18 +1,22 @@
 {
   "name": "progress-formatter",
-  "displayName": "Progress Formatter",
-  "description": "Professional formatter for Progress 4GL (OpenEdge ABL) with intelligent code formatting, alignment, and clean code standards support.",
-  "version": "0.0.1",
+  "displayName": "Progress Formatter & OpenEdge ABL",
+  "description": "Complete OpenEdge ABL (Progress 4GL) extension: intelligent formatter, syntax highlighting, auto-complete, hover, go-to-definition, check syntax, compile, run, deploy, and visual configuration.",
+  "version": "1.0.0",
   "icon": "logo.png",
   "publisher": "CoimbroxDev",
   "engines": {
     "vscode": "^1.80.0"
   },
   "categories": [
-    "Formatters"
+    "Programming Languages",
+    "Formatters",
+    "Snippets",
+    "Linters"
   ],
   "activationEvents": [
-    "onLanguage:progress"
+    "onLanguage:progress",
+    "onCommand:progressFormatter.openConfig"
   ],
   "main": "./out/extension.js",
   "contributes": {
@@ -21,14 +25,39 @@
         "id": "progress",
         "aliases": [
           "Progress",
-          "OpenEdge ABL"
+          "OpenEdge ABL",
+          "Progress 4GL"
         ],
         "extensions": [
           ".p",
           ".w",
           ".i",
           ".cls"
-        ]
+        ],
+        "configuration": "./language-configuration.json"
+      }
+    ],
+    "grammars": [
+      {
+        "language": "progress",
+        "scopeName": "source.abl",
+        "path": "./syntaxes/abl.tmLanguage.json"
+      }
+    ],
+    "snippets": [
+      {
+        "language": "progress",
+        "path": "./snippets/abl.json"
+      }
+    ],
+    "jsonValidation": [
+      {
+        "fileMatch": ".openedge-zext.json",
+        "url": "./schemas/openedge-config.schema.json"
+      },
+      {
+        "fileMatch": ".openedge-abl.json",
+        "url": "./schemas/openedge-config.schema.json"
       }
     ],
     "formatters": [
@@ -37,13 +66,176 @@
         "displayName": "Progress 4GL Formatter",
         "id": "progress-4gl-formatter"
       }
-    ]
+    ],
+    "commands": [
+      {
+        "command": "progressFormatter.openConfig",
+        "title": "ABL: Configure OpenEdge Environment",
+        "icon": "$(gear)"
+      },
+      {
+        "command": "progressFormatter.readDictionary",
+        "title": "ABL: Read Dictionary Structure"
+      },
+      {
+        "command": "progressFormatter.checkSyntax",
+        "title": "ABL: Check Syntax",
+        "icon": "$(check)"
+      },
+      {
+        "command": "progressFormatter.checkSyntaxLocal",
+        "title": "ABL: Check Syntax (Offline / Static)"
+      },
+      {
+        "command": "progressFormatter.compileAndDeploy",
+        "title": "ABL: Compile & Deploy",
+        "icon": "$(rocket)"
+      },
+      {
+        "command": "progressFormatter.compileToFolder",
+        "title": "ABL: Compile & Generate .r in Folder..."
+      },
+      {
+        "command": "progressFormatter.deploySource",
+        "title": "ABL: Deploy Source"
+      },
+      {
+        "command": "progressFormatter.compileWithOptions",
+        "title": "ABL: Compile with Options"
+      },
+      {
+        "command": "progressFormatter.runProgram",
+        "title": "ABL: Run Program",
+        "icon": "$(play)"
+      },
+      {
+        "command": "progressFormatter.formatKeywordsUpper",
+        "title": "ABL: Format - Keywords - Upper Case"
+      },
+      {
+        "command": "progressFormatter.formatKeywordsLower",
+        "title": "ABL: Format - Keywords - Lower Case"
+      },
+      {
+        "command": "progressFormatter.formatTrimRight",
+        "title": "ABL: Format - Trim Right"
+      }
+    ],
+    "keybindings": [
+      {
+        "command": "progressFormatter.compileAndDeploy",
+        "key": "alt+f1",
+        "when": "editorTextFocus && editorLangId == progress"
+      },
+      {
+        "command": "progressFormatter.deploySource",
+        "key": "alt+f2",
+        "when": "editorTextFocus && editorLangId == progress"
+      },
+      {
+        "command": "progressFormatter.compileWithOptions",
+        "key": "alt+f3",
+        "when": "editorTextFocus && editorLangId == progress"
+      },
+      {
+        "command": "progressFormatter.checkSyntax",
+        "key": "shift+f2",
+        "when": "editorTextFocus && editorLangId == progress"
+      },
+      {
+        "command": "progressFormatter.runProgram",
+        "key": "f2",
+        "when": "editorTextFocus && editorLangId == progress"
+      }
+    ],
+    "submenus": [
+      {
+        "id": "progressFormatter.contextMenu",
+        "label": "OpenEdge ABL"
+      }
+    ],
+    "menus": {
+      "editor/title": [
+        {
+          "command": "progressFormatter.checkSyntax",
+          "when": "editorLangId == progress",
+          "group": "navigation@1"
+        },
+        {
+          "command": "progressFormatter.compileAndDeploy",
+          "when": "editorLangId == progress",
+          "group": "navigation@2"
+        },
+        {
+          "command": "progressFormatter.runProgram",
+          "when": "editorLangId == progress",
+          "group": "navigation@3"
+        }
+      ],
+      "editor/context": [
+        {
+          "submenu": "progressFormatter.contextMenu",
+          "when": "editorLangId == progress",
+          "group": "navigation"
+        }
+      ],
+      "progressFormatter.contextMenu": [
+        {
+          "command": "progressFormatter.checkSyntax",
+          "group": "1_build@1"
+        },
+        {
+          "command": "progressFormatter.checkSyntaxLocal",
+          "group": "1_build@2"
+        },
+        {
+          "command": "progressFormatter.compileAndDeploy",
+          "group": "1_build@3"
+        },
+        {
+          "command": "progressFormatter.compileToFolder",
+          "group": "1_build@4"
+        },
+        {
+          "command": "progressFormatter.compileWithOptions",
+          "group": "1_build@5"
+        },
+        {
+          "command": "progressFormatter.deploySource",
+          "group": "1_build@6"
+        },
+        {
+          "command": "progressFormatter.runProgram",
+          "group": "1_build@7"
+        },
+        {
+          "command": "progressFormatter.formatKeywordsUpper",
+          "group": "2_format@1"
+        },
+        {
+          "command": "progressFormatter.formatKeywordsLower",
+          "group": "2_format@2"
+        },
+        {
+          "command": "progressFormatter.formatTrimRight",
+          "group": "2_format@3"
+        },
+        {
+          "command": "progressFormatter.readDictionary",
+          "group": "3_config@1"
+        },
+        {
+          "command": "progressFormatter.openConfig",
+          "group": "3_config@2"
+        }
+      ]
+    }
   },
   "scripts": {
     "vscode:prepublish": "npm run compile",
     "compile": "tsc -p ./",
     "watch": "tsc -watch -p ./",
-    "test": "tsc -p ./ && node --test out/formatter/__tests__/*.test.js"
+    "test": "tsc -p ./ && node --test out/formatter/__tests__/*.test.js out/language/__tests__/*.test.js out/openedge/__tests__/*.test.js"
   },
   "devDependencies": {
     "@types/node": "^22.0.0",

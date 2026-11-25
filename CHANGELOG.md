@@ -5,6 +5,20 @@ Todas as mudanças notáveis neste projeto serão documentadas neste arquivo.
 O formato é baseado em [Keep a Changelog](https://keepachangelog.com/pt-BR/1.0.0/),
 e este projeto adere ao [Semantic Versioning](https://semver.org/lang/pt-BR/).
 
+## [1.0.0] - 2026-11-25
+
+### ✨ Adicionado
+
+- **Painel Visual de Configuração (Webview)**: configure `dlcPath`, `workingDirectory`, `proPath`, `parameterFiles`, `dbDictionary` e `deployment` com interface gráfica, seletores de pasta/arquivo, detecção automática de instalações OpenEdge (`DLC`) e descoberta automática de arquivos `.pf`.
+- **JSON Schema para `.openedge-zext.json` e `.openedge-abl.json`**: validação e auto-complete nativos no editor JSON, mantendo compatibilidade com projetos OpenEdge-ZExt.
+- **Check Syntax (`Shift+F2`)**: validação oficial usando o compilador Progress (`COMPILE ... SAVE = NO`) com erros/warnings destacados na linha/coluna no painel **Problems**, além de modo **Check Syntax Offline/Estático** (`ABL: Check Syntax (Offline / Static)`).
+- **Compile, Run e Deploy (`Alt+F1`, `Alt+F2`, `Alt+F3`, `F2`)**: compilação com geração de `.r` na pasta de deploy, seleção rápida de pasta (`ABL: Compile & Generate .r in Folder...`), opção `preserveSubfolder`, compilação com opções (`XREF`, `XREF-XML`, `DEBUG-LIST`, `PREPROCESS`, `LISTING`, `STRING-XREF`) e `postAction` (`URL` e `COMMAND`).
+- **Botões na barra superior do editor e menu de contexto**: acesso rápido em um clique para Check Syntax, Compile & Deploy e Run.
+- **Leitura de Dicionário de Banco (`ABL: Read Dictionary Structure`)**: gera cache local de tabelas e campos para auto-complete e hover.
+- **Inteligência de Código**: Auto-complete (tabelas, campos, temp-tables, buffers, variáveis, parâmetros, procedures, functions, methods, preprocessors e includes ao digitar `{`), Hover informativo e Go to Definition (`Ctrl+Click`).
+- **Syntax Highlighting TextMate**, **Snippets ABL** e **Code Folding** (`//#region` / `//#endregion` e blocos `PROCEDURE`/`FUNCTION`/`METHOD`/`CLASS`).
+- **Comandos extras de formatação**: `ABL: Format - Keywords - Upper Case`, `ABL: Format - Keywords - Lower Case` e `ABL: Format - Trim Right` (mantendo o formatador inteligente como padrão).
+
 ## [0.0.5] - 2026-08-25
 
 ### ♻️ Reescrito

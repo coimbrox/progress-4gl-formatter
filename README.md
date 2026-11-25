@@ -1,82 +1,158 @@
-# Progress 4GL/ABL Formatter for VS Code
+# Progress Formatter & OpenEdge ABL for VS Code
 
-![Version](https://img.shields.io/badge/version-0.0.4-blue.svg)
+![Version](https://img.shields.io/badge/version-1.0.0-blue.svg)
 ![VS Code](https://img.shields.io/badge/VS%20Code-1.80.0+-green.svg)
 
-Um formatador profissional e completo para a linguagem **Progress 4GL (OpenEdge ABL)** no Visual Studio Code. Este formatador aplica padrões de código consistentes e legíveis, seguindo as melhores práticas da comunidade Progress.
+Extensão completa para **Progress 4GL (OpenEdge ABL)** no Visual Studio Code: **Formatação Inteligente**, **Syntax Highlighting**, **Auto-complete** (tabelas, campos, temp-tables, buffers, variáveis, parâmetros, métodos e includes), **Navegação (`Ctrl+Click`)**, **Hover**, **Check Syntax** (compilador oficial Progress + modo offline), **Compile, Run e Deploy** (`.r` e fonte), **Snippets**, **Code Folding** e **Painel Visual de Configuração** compatível com `.openedge-zext.json`.
 
 ## 📋 Índice
 
-- [Características](#-características)
+- [Recursos](#-recursos)
 - [Instalação](#-instalação)
-- [Como Usar](#-como-usar)
-- [Funcionalidades Detalhadas](#-funcionalidades-detalhadas)
-- [Exemplos](#-exemplos)
-- [Configuração](#-configuração)
-- [Contribuindo](#-contribuindo)
+- [Configuração Facilitada](#-configuração-facilitada)
+- [Check Syntax, Compile, Run e Deploy](#-check-syntax-compile-run-e-deploy)
+- [Atalhos e Comandos](#-atalhos-e-comandos)
+- [Auto-complete, Hover e Navegação](#-auto-complete-hover-e-navegação)
+- [Formatação de Código](#-formatação-de-código)
+- [Snippets e Code Folding](#-snippets-e-code-folding)
+- [Licença e Autor](#-licença-e-autor)
 
-## ✨ Características
+---
 
-<!-- 
-TODO: Adicionar screenshot mostrando antes/depois da formatação
-![Antes e Depois da Formatação](images/screenshot-before-after.png)
--->
+## ✨ Recursos
 
-### 🎯 Formatação Inteligente
+- **Painel Visual de Configuração (Webview)** com detecção automática do `DLC` (OpenEdge) e de arquivos `.pf` do workspace — além de JSON Schema com auto-complete ao editar `.openedge-zext.json` ou `.openedge-abl.json` manualmente.
+- **Check Syntax estilo Progress (`Shift+F2`)**: usa o compilador oficial do Progress (`COMPILE ... SAVE = NO`) destacando erros e warnings direto no editor e no painel **Problems**, com opção de **Check Syntax Offline/Estático** quando o `DLC` ainda não estiver configurado.
+- **Compile, Run e Deploy (`Alt+F1`, `Alt+F2`, `Alt+F3`, `F2`)**: gera o `.r` direto nas pastas configuradas (ou em uma pasta escolhida na hora), com suporte a `preserveSubfolder`, opções de compilação (`XREF`, `XREF-XML`, `DEBUG-LIST`, `PREPROCESS`, `LISTING`, `STRING-XREF`) e `postAction` (`URL` ou `COMMAND`).
+- **Botões rápidos no topo do editor** (`✓` Check Syntax, `🚀` Compile & Deploy, `▶` Run) e menu de contexto (**botão direito → OpenEdge ABL**).
+- **Syntax Highlighting** para `.p`, `.w`, `.i` e `.cls`.
+- **Auto-complete inteligente**:
+  - Tabelas e campos do banco de dados via comando `ABL: Read Dictionary Structure`.
+  - Temp-tables (incluindo herança `LIKE`), buffers, variáveis, parâmetros, procedures, functions, methods e preprocessors.
+  - Sugestão automática de arquivos include (`.i`) ao digitar `{`.
+- **Hover Information**: passe o mouse sobre tabelas, campos (`tabela.campo`), buffers, variáveis, parâmetros, rotinas ou `{includes.i}` para ver tipo, assinatura e caminho resolvido.
+- **Navegação (`Ctrl+Click`)**: abra arquivos `{include.i}` ou vá direto à declaração de variáveis, parâmetros, temp-tables, buffers, procedures, functions e methods (no arquivo atual ou em includes).
+- **Formatação Inteligente + Comandos Extras**: mantém o formatador inteligente baseado em lexer como padrão e adiciona `Keywords - Upper Case`, `Keywords - Lower Case` e `Trim Right`.
+- **Code Folding**: suporte a `//#region` / `//#endregion`, `/*#region*/` / `/*#endregion*/` e blocos `PROCEDURE`, `FUNCTION`, `METHOD` e `CLASS`.
+- **Code Snippets**: atalhos prontos (`defvar`, `defparam`, `deftt`, `defbuf`, `for`, `find`, `ifdo`, `proc`, `func`, `method`, `class`, `try`, `msg`, `region`).
 
-- **Padronização de Palavras-chave**: Converte automaticamente palavras-chave para suas formas abreviadas padrão (`DEFINE` → `def`, `VARIABLE` → `var`, etc.)
-- **Indentação Automática**: Indenta corretamente todos os blocos de código Progress
-- **Alinhamento Inteligente**: Alinha condições, atribuições e declarações para melhor legibilidade
-- **Suporte Completo**: Funciona com todos os tipos de arquivos Progress (`.p`, `.w`, `.i`, `.cls`)
-
-### 🔧 Funcionalidades Principais
-
-#### 1. Formatação de Blocos Condicionais
-- Formata blocos `IF`, `FOR`, `REPEAT` com múltiplas condições
-- Alinha condições `AND`/`OR` de forma consistente
-- Mantém indentação correta em blocos aninhados
-
-#### 2. Formatação de Consultas (FIND/FOR EACH)
-- Detecta e formata blocos `FIND` com cláusulas `WHERE`
-- Suporta `FOR EACH` com `WHERE` na mesma linha ou em linhas separadas
-- Alinha condições `WHERE`/`AND`/`OR` automaticamente
-
-#### 3. Formatação de Atribuições (ASSIGN)
-- Alinha o operador `=` em blocos `ASSIGN` de múltiplas linhas
-- Mantém consistência visual em atribuições complexas
-
-#### 4. Formatação de Definições
-- Formata `def var`, `def param`, `def temp-table`, `def buffer`, `def stream`
-- Suporta modificadores (`new`, `global`, `shared`, `input`, `output`)
-- Alinha nomes de variáveis e tipos
+---
 
 ## 🚀 Instalação
 
 ### Via VS Code Marketplace
 
 1. Abra o VS Code
-2. Vá para a aba **Extensions** (Ctrl+Shift+X)
-3. Procure por **"Progress 4GL Formatter"**
+2. Vá na aba **Extensions** (`Ctrl+Shift+X`)
+3. Procure por **"Progress Formatter & OpenEdge ABL"** (`CoimbroxDev.progress-formatter`)
 4. Clique em **Install**
 
 ### Via VSIX
 
 1. Baixe o arquivo `.vsix` da [página de releases](https://github.com/coimbrox/progress-4gl-formatter/releases)
-2. No VS Code, vá em **Extensions** → **...** → **Install from VSIX...**
-3. Selecione o arquivo baixado
+2. No VS Code: **Extensions** → `...` → **Install from VSIX...**
 
-## 💻 Como Usar
+---
 
-### Formatação Manual
+## ⚙️ Configuração Facilitada
 
-1. Abra um arquivo Progress (`.p`, `.w`, `.i`, `.cls`)
-2. Use uma das seguintes opções:
-   - **Atalho**: `Shift+Alt+F` (Windows/Linux) ou `Shift+Option+F` (Mac)
-   - **Menu**: Clique com botão direito → **Format Document**
-   - **Paleta de Comandos**: `Ctrl+Shift+P` → Digite "Format Document"
+Você não precisa escrever o JSON do zero!
 
-<!-- TODO: Adicionar screenshot do menu de formatação -->
-<!-- ![Menu de Formatação](images/screenshot-format-menu.png) -->
+### Opção 1 — Painel Visual (Recomendado)
+1. Clique em **`OpenEdge ABL`** na **barra de status** (canto inferior esquerdo) ou execute **`ABL: Configure OpenEdge Environment`** (`Ctrl+Shift+P`).
+2. Selecione o **DLC** detectado automaticamente (ou clique em **Procurar...**).
+3. Adicione pastas no **PROPATH**, selecione seus arquivos **`.pf`** (descobertos automaticamente), informe os nomes lógicos dos bancos em **`dbDictionary`** e configure suas pastas de **Deploy**.
+4. Clique em **Salvar Configuração** — a extensão gera/atualiza `.openedge-zext.json` na raiz do workspace.
+
+### Opção 2 — Arquivo `.openedge-zext.json` (com JSON Schema)
+A extensão é 100% compatível com `.openedge-zext.json` (e `.openedge-abl.json`), com validação e auto-complete nativo:
+
+```json
+{
+  "workingDirectory": "${workspaceFolder}\\Temp",
+  "proPath": [
+    "C:\\src",
+    "${workspaceFolder}"
+  ],
+  "proPathMode": "overwrite",
+  "dlcPath": "C:\\Progress\\OpenEdge",
+  "parameterFiles": [
+    "default.pf"
+  ],
+  "dbDictionary": [
+    "meuBanco"
+  ],
+  "deployment": [
+    {
+      "taskType": "current.r-code",
+      "path": "C:\\out",
+      "preserveSubfolder": false,
+      "postAction": [
+        {
+          "actionType": "URL",
+          "command": "http://localhost:8080/postAction"
+        }
+      ]
+    }
+  ]
+}
+```
+
+- `dlcPath` é opcional caso a variável de ambiente `DLC` já esteja definida (ou seja detectada automaticamente).
+- `proPathMode` aceita `"overwrite"`, `"append"` ou `"prepend"`.
+- `preserveSubfolder`: quando `true`, mantém a estrutura de subpastas relativa ao workspace ao gerar o `.r` ou copiar o fonte.
+
+---
+
+## 🛠️ Check Syntax, Compile, Run e Deploy
+
+Ao abrir qualquer arquivo `.p`, `.w`, `.i` ou `.cls`, você tem 3 formas de acionar os comandos:
+- **Botões no topo direito do editor**: `✓` (Check Syntax), `🚀` (Compile & Deploy) e `▶` (Run).
+- **Menu de contexto**: clique com o botão direito no editor → **OpenEdge ABL**.
+- **Atalhos de teclado** ou **Paleta de Comandos (`Ctrl+Shift+P`)**.
+
+### Check Syntax
+- **`Shift+F2` (`ABL: Check Syntax`)**: executa o compilador real do Progress (`COMPILE ... SAVE = NO`). Quando não há erros, exibe **`Syntax is correct`**; quando há erros/warnings, destaca exatamente a linha/coluna no editor e abre o painel **Problems**.
+- **Modo Offline**: se o `DLC` ainda não estiver configurado, a extensão oferece rodar o **`ABL: Check Syntax (Offline / Static)`** para validar blocos sem `END.`, strings/comentários não fechados e parênteses desbalanceados.
+
+### Compile & Deploy (gerar arquivo na pasta)
+- **`Alt+F1` (`ABL: Compile & Deploy`)**: compila o programa e gera o `.r` em todas as pastas configuradas em `deployment` (`current.r-code`). Se você ainda não configurou nenhuma pasta de deploy, a extensão pergunta a pasta na hora e oferece salvá-la como padrão.
+- **`ABL: Compile & Generate .r in Folder...`**: compila e deixa escolher qualquer pasta de destino na hora para gerar o `.r`.
+- **`Alt+F3` (`ABL: Compile with Options`)**: compila gerando opções adicionais (`XREF`, `XREF-XML`, `DEBUG-LIST`, `PREPROCESS`, `LISTING`, `STRING-XREF`) + deploy.
+- **`Alt+F2` (`ABL: Deploy Source`)**: envia o código-fonte sem compilar para a pasta configurada (`current.source`).
+
+---
+
+## ⌨️ Atalhos e Comandos
+
+| Atalho | Comando | Descrição |
+| --- | --- | --- |
+| `Shift+F2` | `ABL: Check Syntax` | Verifica sintaxe com o compilador Progress e destaca erros |
+| `Alt+F1` | `ABL: Compile & Deploy` | Compila o arquivo atual e gera o `.r` na pasta de deploy |
+| `Alt+F2` | `ABL: Deploy Source` | Copia o arquivo fonte para a pasta de deploy (sem compilar) |
+| `Alt+F3` | `ABL: Compile with Options` | Compila com opções extras (XREF, DEBUG-LIST, PREPROCESS, etc.) + deploy |
+| `F2` | `ABL: Run Program` | Executa o programa atual no Progress (`prowin` / `_progres`) |
+| `Shift+Alt+F` | `Format Document` | Executa o formatador inteligente Progress 4GL |
+| — | `ABL: Configure OpenEdge Environment` | Abre o painel visual de configuração |
+| — | `ABL: Read Dictionary Structure` | Lê tabelas e campos dos bancos configurados para auto-complete |
+| — | `ABL: Compile & Generate .r in Folder...` | Compila e gera o `.r` em uma pasta escolhida na hora |
+| — | `ABL: Check Syntax (Offline / Static)` | Verificação estrutural rápida sem precisar de DLC |
+| — | `ABL: Format - Keywords - Upper Case` | Converte palavras-chave ABL para MAIÚSCULAS |
+| — | `ABL: Format - Keywords - Lower Case` | Converte palavras-chave ABL para minúsculas |
+| — | `ABL: Format - Trim Right` | Remove espaços/tabs ao final de todas as linhas |
+
+---
+
+## 🧠 Auto-complete, Hover e Navegação
+
+1. Para ativar o auto-complete de **tabelas e campos do banco**, configure seus arquivos `.pf` e `dbDictionary` no painel visual e execute **`ABL: Read Dictionary Structure`** (ou clique em **Ler Dicionário Agora** no painel).
+2. Digite `tabela.` ou `buffer.` ou `tt-tabela.` para listar todos os campos com tipo, formato e descrição.
+3. Digite `{` para receber sugestões automáticas de arquivos `.i` presentes no seu `PROPATH`.
+4. Segure **`Ctrl`** e clique em `{arquivo.i}`, variáveis, parâmetros, temp-tables, buffers, procedures, functions ou methods para navegar diretamente até a definição.
+
+---
+
+## 🎨 Formatação de Código
 
 ### Formatação Automática ao Salvar
 
@@ -84,239 +160,47 @@ Adicione ao seu `settings.json` do VS Code:
 
 ```json
 {
-    "[progress]": {
-        "editor.formatOnSave": true,
-        "editor.defaultFormatter": "CoimbroxDev.progress-4gl-formatter"
-    },
-    "[abl]": {
-        "editor.formatOnSave": true,
-        "editor.defaultFormatter": "CoimbroxDev.progress-4gl-formatter"
-    }
+  "[progress]": {
+    "editor.formatOnSave": true,
+    "editor.defaultFormatter": "CoimbroxDev.progress-formatter",
+    "editor.tabSize": 2,
+    "editor.insertSpaces": true
+  }
 }
 ```
 
-## 📖 Funcionalidades Detalhadas
-
-### 1. Formatação de Blocos IF/FOR/REPEAT
-
-**Antes:**
-```progress
-IF gra-par.cd-grau-parentesco = 01 OR gra-par.cd-grau-parentesco = 62 THEN DO:
-```
-
-**Depois:**
-```progress
-if   gra-par.cd-grau-parentesco = 01
-or   gra-par.cd-grau-parentesco = 62
-then do:
-```
-
-### 2. Formatação de FIND com WHERE
+### Exemplo de Formatação Inteligente
 
 **Antes:**
 ```progress
 FIND FIRST tmp-benef WHERE tmp-benef.cd-modalidade = usuario.cd-modalidade AND tmp-benef.nr-ter-adesao = usuario.nr-ter-adesao NO-LOCK NO-ERROR.
-```
-
-**Depois:**
-```progress
-find first tmp-benef 
-     where tmp-benef.cd-modalidade = usuario.cd-modalidade
-       and tmp-benef.nr-ter-adesao = usuario.nr-ter-adesao
-           no-lock no-error.
-```
-
-### 3. Formatação de FOR EACH com WHERE
-
-**Antes:**
-```progress
-FOR EACH tmp-benef WHERE tmp-benef.cd-modalidade = notaserv.cd-modalidade AND tmp-benef.nr-ter-adesao = notaserv.nr-ter-adesao NO-LOCK:
-```
-
-**Depois:**
-```progress
-for each tmp-benef where tmp-benef.cd-modalidade = notaserv.cd-modalidade
-                     and tmp-benef.nr-ter-adesao = notaserv.nr-ter-adesao
-                         no-lock:
-```
-
-### 4. Formatação de ASSIGN
-
-**Antes:**
-```progress
 ASSIGN vl-desconto-aux = 0 vl-mensalidade-aux = 0 pc-percentual-aux = 0.
 ```
 
 **Depois:**
 ```progress
+find first tmp-benef
+     where tmp-benef.cd-modalidade = usuario.cd-modalidade
+       and tmp-benef.nr-ter-adesao = usuario.nr-ter-adesao
+           no-lock no-error.
 assign vl-desconto-aux    = 0
        vl-mensalidade-aux = 0
        pc-percentual-aux  = 0.
 ```
 
-### 5. Formatação de Definições
+---
 
-**Antes:**
-```progress
-DEFINE VARIABLE c-prog-gerado AS CHARACTER NO-UNDO INITIAL "dees045r".
-DEFINE NEW GLOBAL SHARED VARIABLE c-arquivo-log AS CHAR FORMAT "x(60)" NO-UNDO.
-```
+## 🧩 Snippets e Code Folding
 
-**Depois:**
-```progress
-def var c-prog-gerado as character no-undo initial "dees045r".
-
-def new global shared var c-arquivo-log as char format "x(60)" no-undo.
-```
-
-### 6. Formatação de Temp-Tables
-
-**Antes:**
-```progress
-DEFINE TEMP-TABLE tmp-benef NO-UNDO
-    FIELD cd-modalidade LIKE modalid.cd-modalidade
-    FIELD nr-ter-adesao LIKE ter-ade.nr-ter-adesao.
-```
-
-**Depois:**
-```progress
-def temp-table tmp-benef no-undo
-    field cd-modalidade like modalid.cd-modalidade
-    field nr-ter-adesao  like ter-ade.nr-ter-adesao.
-```
-
-## 🎨 Exemplos Visuais
-
-<!-- 
-TODO: Adicionar screenshots para cada exemplo abaixo
-- screenshot-if-block.png
-- screenshot-find-query.png  
-- screenshot-assign-block.png
--->
-
-### Exemplo 1: Bloco IF Complexo
-
-<!-- ![Bloco IF Formatado](images/screenshot-if-block.png) -->
-
-**Antes da formatação:**
-```progress
-IF gra-par.cd-grau-parentesco = 01 OR gra-par.cd-grau-parentesco = 62 OR gra-par.cd-grau-parentesco = 63 THEN DO:
-    ASSIGN ds-grau-parentesco-aux = "TITULAR".
-END.
-```
-
-**Depois da formatação:**
-```progress
-if   gra-par.cd-grau-parentesco = 01
-or   gra-par.cd-grau-parentesco = 62
-or   gra-par.cd-grau-parentesco = 63
-then do:
-    assign ds-grau-parentesco-aux = "TITULAR".
-end.
-```
-
-### Exemplo 2: Consulta com Múltiplas Condições
-
-**Antes da formatação:**
-```progress
-FIND FIRST vlbenef WHERE vlbenef.cd-modalidade = notaserv.cd-modalidade AND vlbenef.cd-contratante = notaserv.cd-contratante AND vlbenef.nr-ter-adesao = notaserv.nr-ter-adesao NO-LOCK NO-ERROR.
-```
-
-**Depois da formatação:**
-```progress
-find first vlbenef 
-     where vlbenef.cd-modalidade         = notaserv.cd-modalidade
-       and vlbenef.cd-contratante        = notaserv.cd-contratante
-       and vlbenef.nr-ter-adesao         = notaserv.nr-ter-adesao
-           no-lock no-error.
-```
-
-### Exemplo 3: Bloco ASSIGN com Múltiplas Atribuições
-
-**Antes da formatação:**
-```progress
-ASSIGN vl-desconto-aux = 0 vl-mensalidade-aux = 0 pc-percentual-aux = 0 vl-total-aux = 0 vl-calculo-aux = 0.
-```
-
-**Depois da formatação:**
-```progress
-assign vl-desconto-aux    = 0
-       vl-mensalidade-aux = 0
-       pc-percentual-aux  = 0
-       vl-total-aux       = 0
-       vl-calculo-aux     = 0.
-```
-
-> 💡 **Dica**: Para ver exemplos mais detalhados, consulte a seção [Exemplos](#-exemplos) acima.
-
-## ⚙️ Configuração
-
-### Configurações Recomendadas
-
-<!-- TODO: Adicionar screenshot das configurações do VS Code -->
-<!-- ![Configurações do VS Code](images/screenshot-settings.png) -->
-
-```json
-{
-    "[progress]": {
-        "editor.formatOnSave": true,
-        "editor.defaultFormatter": "CoimbroxDev.progress-formatter",
-        "editor.tabSize": 2,
-        "editor.insertSpaces": true
-    }
-}
-```
-
-### Configurações Avançadas
-
-Atualmente, o formatador segue padrões estabelecidos pela comunidade Progress. Se você tiver necessidades específicas de formatação, abra uma [Issue](https://github.com/coimbrox/progress-4gl-formatter/issues) descrevendo seu caso de uso.
-
-## 🤝 Contribuindo
-
-Contribuições são muito bem-vindas! Este projeto está em desenvolvimento ativo e toda ajuda é apreciada.
-
-### Como Contribuir
-
-1. **Reportar Bugs**: Encontrou um bug? [Abra uma Issue](https://github.com/coimbrox/progress-4gl-formatter/issues) descrevendo o problema
-2. **Sugerir Melhorias**: Tem uma ideia? [Abra uma Issue](https://github.com/coimbrox/progress-4gl-formatter/issues) com sua sugestão
-3. **Enviar Pull Requests**: Implementou uma melhoria? Envie um PR!
-
-### Exemplos Úteis
-
-Ao reportar problemas ou sugerir melhorias, inclua:
-- Código **antes** da formatação
-- Código **depois** da formatação (como você espera que fique)
-- Contexto adicional se necessário
-
-## 📝 Notas de Versão
-
-Consulte o [CHANGELOG.md](CHANGELOG.md) para ver todas as mudanças e melhorias em cada versão.
-
-### Versão Atual: 0.0.4
-
-**Principais melhorias:**
-- ✅ Suporte completo para `FOR EACH` com `WHERE`
-- ✅ Melhorias na formatação de blocos `FIND`
-- ✅ Formatação aprimorada de blocos `ASSIGN`
-- ✅ Suporte para `def buffer` e `def stream`
-- ✅ Formatação de blocos condicionais (`IF`/`FOR`/`REPEAT`)
-
-## 📄 Licença
-
-Este projeto está disponível como código aberto. Consulte o arquivo LICENSE para mais detalhes.
-
-## 🔗 Links Úteis
-
-- [Repositório no GitHub](https://github.com/coimbrox/progress-4gl-formatter)
-- [Reportar um Bug](https://github.com/coimbrox/progress-4gl-formatter/issues)
-- [Sugerir uma Funcionalidade](https://github.com/coimbrox/progress-4gl-formatter/issues)
-
-## 👤 Autor
-**Commited for Support Microsoft**
-**Gabriel Coimbra**
-
-- GitHub: [@coimbrox](https://github.com/coimbrox)
+- **Snippets**: digite `defvar`, `defparam`, `deftt`, `defbuf`, `for`, `find`, `ifdo`, `proc`, `func`, `method`, `class`, `try`, `msg` ou `region` e pressione `Tab`.
+- **Code Folding**: organize trechos do código com `//#region Nome da Seção` ... `//#endregion` (mesmo padrão do TypeScript).
 
 ---
 
-⭐ **Gostou do projeto?** Considere dar uma estrela no repositório!
+## 📄 Licença e Autor
+
+Código aberto sob licença MIT — consulte [LICENSE](LICENSE).
+
+**Gabriel Coimbra** — GitHub: [@coimbrox](https://github.com/coimbrox)
+- [Repositório no GitHub](https://github.com/coimbrox/progress-4gl-formatter)
+- [Reportar Bug / Sugerir Melhoria](https://github.com/coimbrox/progress-4gl-formatter/issues)

@@ -2,6 +2,8 @@
 src/**
 out/**/*.map
 out/formatter/__tests__/**
+out/language/__tests__/**
+out/openedge/__tests__/**
 out/test/**
 node_modules/**
 .gitignore
